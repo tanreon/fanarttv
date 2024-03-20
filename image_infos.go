@@ -24,7 +24,7 @@ func (i *ImageInfo) UnmarshalJSON(data []byte) error {
 		URL    *string `json:"url"`
 		Lang   *string `json:"lang"`
 		Season *string `json:"season"`
-		Likes  string  `json:"likes"`
+		Likes  interface{}  `json:"likes"`
 	}{
 		ID:     &i.ID,
 		URL:    &i.URL,
@@ -35,12 +35,18 @@ func (i *ImageInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// Convert the likes into int
-	likes, err := strconv.Atoi(aux.Likes)
-	if err != nil {
-		return err
+	switch v := aux.Likes.(type) {
+		case float64:
+			i.Likes = int(v)
+		case string:
+			c, err := strconv.Atoi(v)
+			if err != nil {
+				i.Likes = 0
+			}
+			i.Likes = c
+	default:
+		i.Likes = 0
 	}
-	i.Likes = likes
 
 	return nil
 }
